@@ -53,6 +53,7 @@ import org.openmetadata.schema.type.ChangeEvent;
 import org.openmetadata.schema.type.EntityHistory;
 import org.openmetadata.schema.type.Include;
 import org.openmetadata.schema.type.MetadataOperation;
+import org.openmetadata.security.Authorizer;
 import org.openmetadata.service.Entity;
 import org.openmetadata.service.jdbi3.CollectionDAO;
 import org.openmetadata.service.jdbi3.ListFilter;
@@ -60,7 +61,7 @@ import org.openmetadata.service.jdbi3.PipelineRepository;
 import org.openmetadata.service.resources.Collection;
 import org.openmetadata.service.resources.EntityResource;
 import org.openmetadata.service.resources.dqtests.TestCaseResource;
-import org.openmetadata.service.security.Authorizer;
+import org.openmetadata.service.security.ApplicationSecurityContext;
 import org.openmetadata.service.security.policyevaluator.OperationContext;
 import org.openmetadata.service.util.RestUtil;
 import org.openmetadata.service.util.ResultList;
@@ -357,7 +358,8 @@ public class PipelineResource extends EntityResource<Pipeline, PipelineRepositor
       @Valid PipelineStatus pipelineStatus)
       throws IOException {
     OperationContext operationContext = new OperationContext(entityType, MetadataOperation.EDIT_STATUS);
-    authorizer.authorize(securityContext, operationContext, getResourceContextByName(fqn));
+    authorizer.authorize(
+        ApplicationSecurityContext.of(securityContext), operationContext, getResourceContextByName(fqn));
     Pipeline pipeline = dao.addPipelineStatus(fqn, pipelineStatus);
     return addHref(uriInfo, pipeline);
   }
@@ -423,7 +425,8 @@ public class PipelineResource extends EntityResource<Pipeline, PipelineRepositor
           Long timestamp)
       throws IOException {
     OperationContext operationContext = new OperationContext(entityType, MetadataOperation.EDIT_STATUS);
-    authorizer.authorize(securityContext, operationContext, getResourceContextByName(fqn));
+    authorizer.authorize(
+        ApplicationSecurityContext.of(securityContext), operationContext, getResourceContextByName(fqn));
     Pipeline pipeline = dao.deletePipelineStatus(fqn, timestamp);
     return addHref(uriInfo, pipeline);
   }

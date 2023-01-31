@@ -43,6 +43,7 @@ import org.openmetadata.schema.api.tests.CreateWebAnalyticEvent;
 import org.openmetadata.schema.type.EntityHistory;
 import org.openmetadata.schema.type.Include;
 import org.openmetadata.schema.type.MetadataOperation;
+import org.openmetadata.security.Authorizer;
 import org.openmetadata.service.Entity;
 import org.openmetadata.service.OpenMetadataApplicationConfig;
 import org.openmetadata.service.jdbi3.CollectionDAO;
@@ -50,7 +51,7 @@ import org.openmetadata.service.jdbi3.ListFilter;
 import org.openmetadata.service.jdbi3.WebAnalyticEventRepository;
 import org.openmetadata.service.resources.Collection;
 import org.openmetadata.service.resources.EntityResource;
-import org.openmetadata.service.security.Authorizer;
+import org.openmetadata.service.security.ApplicationSecurityContext;
 import org.openmetadata.service.security.policyevaluator.OperationContext;
 import org.openmetadata.service.util.MicrometerBundleSingleton;
 import org.openmetadata.service.util.RestUtil;
@@ -442,7 +443,8 @@ public class WebAnalyticEventResource extends EntityResource<WebAnalyticEvent, W
           Long timestamp)
       throws IOException {
     OperationContext operationContext = new OperationContext(entityType, MetadataOperation.DELETE);
-    authorizer.authorize(securityContext, operationContext, getResourceContextByName(name.value()));
+    authorizer.authorize(
+        ApplicationSecurityContext.of(securityContext), operationContext, getResourceContextByName(name.value()));
     dao.deleteWebAnalyticEventData(name, timestamp);
     return Response.ok().build();
   }

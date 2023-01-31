@@ -57,6 +57,7 @@ import org.openmetadata.schema.entity.type.CustomProperty;
 import org.openmetadata.schema.type.EntityHistory;
 import org.openmetadata.schema.type.Include;
 import org.openmetadata.schema.type.MetadataOperation;
+import org.openmetadata.security.Authorizer;
 import org.openmetadata.service.Entity;
 import org.openmetadata.service.OpenMetadataApplicationConfig;
 import org.openmetadata.service.jdbi3.CollectionDAO;
@@ -64,7 +65,7 @@ import org.openmetadata.service.jdbi3.ListFilter;
 import org.openmetadata.service.jdbi3.TypeRepository;
 import org.openmetadata.service.resources.Collection;
 import org.openmetadata.service.resources.EntityResource;
-import org.openmetadata.service.security.Authorizer;
+import org.openmetadata.service.security.ApplicationSecurityContext;
 import org.openmetadata.service.security.policyevaluator.OperationContext;
 import org.openmetadata.service.util.EntityUtil.Fields;
 import org.openmetadata.service.util.JsonUtils;
@@ -389,7 +390,7 @@ public class TypeResource extends EntityResource<Type, TypeRepository> {
       throws IOException {
     // TODO fix this is the typeID correct? Why are we not doing this by name?
     OperationContext operationContext = new OperationContext(entityType, MetadataOperation.CREATE);
-    authorizer.authorize(securityContext, operationContext, getResourceContextById(id));
+    authorizer.authorize(ApplicationSecurityContext.of(securityContext), operationContext, getResourceContextById(id));
     PutResponse<Type> response =
         dao.addCustomProperty(uriInfo, securityContext.getUserPrincipal().getName(), id, property);
     addHref(uriInfo, response.getEntity());

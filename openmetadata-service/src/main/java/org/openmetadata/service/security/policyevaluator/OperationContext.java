@@ -9,12 +9,13 @@ import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.openmetadata.common.utils.CommonUtil;
 import org.openmetadata.schema.type.MetadataOperation;
+import org.openmetadata.security.OperationContextInterface;
 import org.openmetadata.service.ResourceRegistry;
 import org.openmetadata.service.util.JsonPatchUtils;
 
 /** OperationContext for Access Control Policy */
 @Slf4j
-public class OperationContext {
+public class OperationContext implements OperationContextInterface {
   @Getter @NonNull private final String resource;
   List<MetadataOperation> operations; // All requested operations
   @Getter private JsonPatch patch;

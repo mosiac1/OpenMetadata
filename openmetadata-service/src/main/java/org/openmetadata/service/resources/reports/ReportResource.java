@@ -39,12 +39,12 @@ import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.UriInfo;
 import org.openmetadata.schema.entity.data.Report;
 import org.openmetadata.schema.type.Include;
+import org.openmetadata.security.Authorizer;
 import org.openmetadata.service.jdbi3.CollectionDAO;
 import org.openmetadata.service.jdbi3.ListFilter;
 import org.openmetadata.service.jdbi3.ReportRepository;
 import org.openmetadata.service.resources.Collection;
 import org.openmetadata.service.resources.EntityResource;
-import org.openmetadata.service.security.Authorizer;
 import org.openmetadata.service.util.EntityUtil.Fields;
 import org.openmetadata.service.util.ResultList;
 

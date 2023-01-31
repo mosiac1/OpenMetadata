@@ -11,37 +11,33 @@
  *  limitations under the License.
  */
 
-package org.openmetadata.service.security;
+package org.openmetadata.security;
 
 import java.io.IOException;
 import java.util.List;
-import javax.ws.rs.core.SecurityContext;
-import org.jdbi.v3.core.Jdbi;
 import org.openmetadata.schema.type.ResourcePermission;
-import org.openmetadata.service.OpenMetadataApplicationConfig;
-import org.openmetadata.service.security.policyevaluator.OperationContext;
-import org.openmetadata.service.security.policyevaluator.ResourceContextInterface;
 
 public interface Authorizer {
 
-  /** Initialize the authorizer */
-  void init(OpenMetadataApplicationConfig openMetadataApplicationConfig, Jdbi jdbi);
+  default void init() {}
 
   /** Returns a list of operations that the authenticated user (subject) can perform */
-  List<ResourcePermission> listPermissions(SecurityContext securityContext, String user);
+  List<ResourcePermission> listPermissions(SecurityContextInterface securityContext, String user);
 
   /** Returns a list of operations that the authenticated user (subject) can perform on a given resource type */
-  ResourcePermission getPermission(SecurityContext securityContext, String user, String resource);
+  ResourcePermission getPermission(SecurityContextInterface securityContext, String user, String resource);
 
   /** Returns a list of operations that the authenticated user (subject) can perform on a given resource */
   ResourcePermission getPermission(
-      SecurityContext securityContext, String user, ResourceContextInterface resourceContext);
+      SecurityContextInterface securityContext, String user, ResourceContextInterface resourceContext);
 
   void authorize(
-      SecurityContext securityContext, OperationContext operationContext, ResourceContextInterface resourceContext)
+      SecurityContextInterface securityContext,
+      OperationContextInterface operationContext,
+      ResourceContextInterface resourceContext)
       throws IOException;
 
-  void authorizeAdmin(SecurityContext securityContext);
+  void authorizeAdmin(SecurityContextInterface securityContext);
 
-  boolean decryptSecret(SecurityContext securityContext);
+  boolean decryptSecret(SecurityContextInterface securityContext);
 }

@@ -33,11 +33,11 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
 import lombok.Getter;
 import org.openmetadata.schema.type.ChangeEvent;
+import org.openmetadata.security.Authorizer;
 import org.openmetadata.service.Entity.EntityList;
 import org.openmetadata.service.jdbi3.ChangeEventRepository;
 import org.openmetadata.service.jdbi3.CollectionDAO;
 import org.openmetadata.service.resources.Collection;
-import org.openmetadata.service.security.Authorizer;
 import org.openmetadata.service.util.EntityUtil;
 import org.openmetadata.service.util.ResultList;
 

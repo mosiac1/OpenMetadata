@@ -61,6 +61,7 @@ import org.jdbi.v3.core.statement.StatementContext;
 import org.jdbi.v3.sqlobject.SqlObjects;
 import org.openmetadata.schema.api.security.AuthenticationConfiguration;
 import org.openmetadata.schema.api.security.AuthorizerConfiguration;
+import org.openmetadata.security.Authorizer;
 import org.openmetadata.service.elasticsearch.ElasticSearchEventPublisher;
 import org.openmetadata.service.events.EventFilter;
 import org.openmetadata.service.events.EventPubSub;
@@ -79,7 +80,6 @@ import org.openmetadata.service.resources.CollectionRegistry;
 import org.openmetadata.service.secrets.SecretsManager;
 import org.openmetadata.service.secrets.SecretsManagerFactory;
 import org.openmetadata.service.secrets.SecretsManagerUpdateService;
-import org.openmetadata.service.security.Authorizer;
 import org.openmetadata.service.security.NoopAuthorizer;
 import org.openmetadata.service.security.NoopFilter;
 import org.openmetadata.service.security.auth.AuthenticatorHandler;
@@ -126,8 +126,11 @@ public class OpenMetadataApplication extends Application<OpenMetadataApplication
     // Validate flyway Migrations
     validateMigrations(jdbi, catalogConfig.getMigrationConfiguration());
 
+    // Register Request Filter
+    registerRequestFilter(catalogConfig, environment);
+
     // Register Authorizer
-    registerAuthorizer(catalogConfig, environment);
+    registerAuthorizer(catalogConfig);
 
     // Register Authenticator
     registerAuthenticator(catalogConfig);
@@ -152,6 +155,15 @@ public class OpenMetadataApplication extends Application<OpenMetadataApplication
 
     registerResources(catalogConfig, environment, jdbi);
 
+    /*
+     There a cyclic dependency between Resources and the Authorizer.
+     The DefaultAuthorizer requires EntityRepositories to be initialized, so it can pull users and other entities. Those
+     Get initialized when the Resources are being initialized. But Resources also have the Authorizer as a dependency.
+     For now, we can work around this by giving the Resources a reference to an Authorizer and only initializing that
+     Authorizer after the EntityRepositories have been constructed.
+    */
+    authorizer.init();
+
     // Register Event Handler
     registerEventFilter(catalogConfig, environment, jdbi);
     environment.lifecycle().manage(new ManagedShutdown());
@@ -160,10 +172,6 @@ public class OpenMetadataApplication extends Application<OpenMetadataApplication
 
     // update entities secrets if required
     new SecretsManagerUpdateService(secretsManager, catalogConfig.getClusterName()).updateEntities();
-
-    // start authorizer after event publishers
-    // authorizer creates admin/bot users, ES publisher should start before to index users created by authorizer
-    authorizer.init(catalogConfig, jdbi);
 
     // authenticationHandler Handles auth related activities
     authenticatorHandler.init(catalogConfig, jdbi);
@@ -248,31 +256,60 @@ public class OpenMetadataApplication extends Application<OpenMetadataApplication
     }
   }
 
-  private void registerAuthorizer(OpenMetadataApplicationConfig catalogConfig, Environment environment)
-      throws NoSuchMethodException, ClassNotFoundException, IllegalAccessException, InvocationTargetException,
-          InstantiationException {
+  private void registerRequestFilter(OpenMetadataApplicationConfig catalogConfig, Environment environment) {
     AuthorizerConfiguration authorizerConf = catalogConfig.getAuthorizerConfiguration();
     AuthenticationConfiguration authenticationConfiguration = catalogConfig.getAuthenticationConfiguration();
+    String filterClazzName = authorizerConf.getContainerRequestFilter();
     // to authenticate request while opening websocket connections
-    if (authorizerConf != null) {
-      authorizer =
-          Class.forName(authorizerConf.getClassName()).asSubclass(Authorizer.class).getConstructor().newInstance();
-      String filterClazzName = authorizerConf.getContainerRequestFilter();
-      ContainerRequestFilter filter;
-      if (!StringUtils.isEmpty(filterClazzName)) {
+    ContainerRequestFilter filter;
+    if (!StringUtils.isEmpty(filterClazzName)) {
+
+      try {
         filter =
             Class.forName(filterClazzName)
                 .asSubclass(ContainerRequestFilter.class)
                 .getConstructor(AuthenticationConfiguration.class, AuthorizerConfiguration.class)
                 .newInstance(authenticationConfiguration, authorizerConf);
-        LOG.info("Registering ContainerRequestFilter: {}", filter.getClass().getCanonicalName());
-        environment.jersey().register(filter);
+      } catch (NoSuchMethodException | SecurityException e) {
+        throw new IllegalArgumentException(
+            String.format("Could not find suitable constructor for Filter class %s", filterClazzName), e);
+      } catch (ClassNotFoundException e) {
+        throw new IllegalArgumentException(String.format("Class not found for Filter class %s", filterClazzName), e);
+      } catch (InvocationTargetException | InstantiationException | IllegalAccessException e) {
+        throw new IllegalArgumentException(String.format("Failed to instantiate Filter class %s", filterClazzName), e);
       }
+
+    } else {
+      LOG.info("Request filter config not set, setting noop request filter");
+      filter = new NoopFilter(authenticationConfiguration, null);
+    }
+
+    LOG.info("Registering ContainerRequestFilter: {}", filter.getClass().getCanonicalName());
+    environment.jersey().register(filter);
+  }
+
+  private void registerAuthorizer(OpenMetadataApplicationConfig catalogConfig) {
+    AuthorizerConfiguration authorizerConf = catalogConfig.getAuthorizerConfiguration();
+    String authorizerClazzName = authorizerConf.getClassName();
+    if (!StringUtils.isEmpty(authorizerClazzName)) {
+
+      try {
+        Class<? extends Authorizer> authorizerClazz = Class.forName(authorizerClazzName).asSubclass(Authorizer.class);
+        authorizer = authorizerClazz.getConstructor(OpenMetadataApplicationConfig.class).newInstance(catalogConfig);
+      } catch (NoSuchMethodException | SecurityException e) {
+        throw new IllegalArgumentException(
+            String.format("Could not find suitable constructor for Authorizer class %s", authorizerClazzName), e);
+      } catch (ClassNotFoundException e) {
+        throw new IllegalArgumentException(
+            String.format("Class not found for Authorizer class %s", authorizerClazzName), e);
+      } catch (InvocationTargetException | InstantiationException | IllegalAccessException e) {
+        throw new IllegalArgumentException(
+            String.format("Failed to instantiate Authorizer class %s", authorizerClazzName), e);
+      }
+
     } else {
       LOG.info("Authorizer config not set, setting noop authorizer");
-      authorizer = new NoopAuthorizer();
-      ContainerRequestFilter filter = new NoopFilter(authenticationConfiguration, null);
-      environment.jersey().register(filter);
+      authorizer = new NoopAuthorizer(catalogConfig);
     }
   }
 

@@ -35,12 +35,13 @@ import org.openmetadata.schema.EntityInterface;
 import org.openmetadata.schema.type.EntityReference;
 import org.openmetadata.schema.type.MetadataOperation;
 import org.openmetadata.schema.type.ResourcePermission;
+import org.openmetadata.security.Authorizer;
 import org.openmetadata.service.Entity;
 import org.openmetadata.service.jdbi3.CollectionDAO;
 import org.openmetadata.service.jdbi3.EntityRepository;
 import org.openmetadata.service.resources.Collection;
 import org.openmetadata.service.resources.EntityResource;
-import org.openmetadata.service.security.Authorizer;
+import org.openmetadata.service.security.ApplicationSecurityContext;
 import org.openmetadata.service.security.policyevaluator.OperationContext;
 import org.openmetadata.service.security.policyevaluator.PolicyEvaluator;
 import org.openmetadata.service.security.policyevaluator.ResourceContext;
@@ -82,7 +83,7 @@ public class PermissionsResource {
               schema = @Schema(type = "string", example = "john"))
           @QueryParam("user")
           String user) {
-    return new ResourcePermissionList(authorizer.listPermissions(securityContext, user));
+    return new ResourcePermissionList(authorizer.listPermissions(ApplicationSecurityContext.of(securityContext), user));
   }
 
   @GET
@@ -111,7 +112,7 @@ public class PermissionsResource {
           String user,
       @Parameter(description = "Resource type", schema = @Schema(type = "String")) @PathParam("resource")
           String resource) {
-    return authorizer.getPermission(securityContext, user, resource);
+    return authorizer.getPermission(ApplicationSecurityContext.of(securityContext), user, resource);
   }
 
   @GET
@@ -144,7 +145,7 @@ public class PermissionsResource {
     EntityRepository<EntityInterface> entityRepository = Entity.getEntityRepository(resource);
     ResourceContext resourceContext =
         ResourceContext.builder().resource(resource).id(id).entityRepository(entityRepository).build();
-    return authorizer.getPermission(securityContext, user, resourceContext);
+    return authorizer.getPermission(ApplicationSecurityContext.of(securityContext), user, resourceContext);
   }
 
   @GET
@@ -177,7 +178,7 @@ public class PermissionsResource {
     EntityRepository<EntityInterface> entityRepository = Entity.getEntityRepository(resource);
     ResourceContext resourceContext =
         ResourceContext.builder().resource(resource).name(name).entityRepository(entityRepository).build();
-    return authorizer.getPermission(securityContext, user, resourceContext);
+    return authorizer.getPermission(ApplicationSecurityContext.of(securityContext), user, resourceContext);
   }
 
   @GET
@@ -205,7 +206,7 @@ public class PermissionsResource {
     EntityRepository<EntityInterface> dao = Entity.getEntityRepository(Entity.POLICY);
     for (UUID id : ids) {
       ResourceContext resourceContext = EntityResource.getResourceContext(Entity.POLICY, dao).id(id).build();
-      authorizer.authorize(securityContext, operationContext, resourceContext);
+      authorizer.authorize(ApplicationSecurityContext.of(securityContext), operationContext, resourceContext);
     }
     List<EntityReference> policies = EntityUtil.populateEntityReferencesById(ids, Entity.POLICY);
     return new ResourcePermissionList(PolicyEvaluator.listPermission(policies));

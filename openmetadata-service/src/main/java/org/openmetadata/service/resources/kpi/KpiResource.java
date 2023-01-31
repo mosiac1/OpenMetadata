@@ -41,6 +41,7 @@ import org.openmetadata.schema.dataInsight.kpi.Kpi;
 import org.openmetadata.schema.dataInsight.type.KpiResult;
 import org.openmetadata.schema.type.EntityHistory;
 import org.openmetadata.schema.type.Include;
+import org.openmetadata.security.Authorizer;
 import org.openmetadata.service.Entity;
 import org.openmetadata.service.exception.EntityNotFoundException;
 import org.openmetadata.service.jdbi3.CollectionDAO;
@@ -48,7 +49,6 @@ import org.openmetadata.service.jdbi3.KpiRepository;
 import org.openmetadata.service.jdbi3.ListFilter;
 import org.openmetadata.service.resources.Collection;
 import org.openmetadata.service.resources.EntityResource;
-import org.openmetadata.service.security.Authorizer;
 import org.openmetadata.service.util.RestUtil;
 import org.openmetadata.service.util.ResultList;
 

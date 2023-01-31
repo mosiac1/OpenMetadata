@@ -58,6 +58,7 @@ import org.openmetadata.schema.settings.FailureDetails;
 import org.openmetadata.schema.settings.Stats;
 import org.openmetadata.schema.type.Include;
 import org.openmetadata.service.Entity;
+import org.openmetadata.security.Authorizer;
 import org.openmetadata.service.OpenMetadataApplicationConfig;
 import org.openmetadata.service.elasticsearch.ElasticSearchIndexDefinition;
 import org.openmetadata.service.elasticsearch.ElasticSearchIndexFactory;
@@ -67,7 +68,7 @@ import org.openmetadata.service.jdbi3.EntityRepository;
 import org.openmetadata.service.jdbi3.ListFilter;
 import org.openmetadata.service.jdbi3.UserRepository;
 import org.openmetadata.service.resources.Collection;
-import org.openmetadata.service.security.Authorizer;
+import org.openmetadata.service.security.ApplicationSecurityContext;
 import org.openmetadata.service.util.ElasticSearchClientUtils;
 import org.openmetadata.service.util.EntityUtil;
 import org.openmetadata.service.util.JsonUtils;
@@ -133,7 +134,7 @@ public class BuildSearchIndexResource {
       @Context UriInfo uriInfo, @Context SecurityContext securityContext, @Valid CreateEventPublisherJob createRequest)
       throws IOException {
     // Only admins  can issue a reindex request
-    authorizer.authorizeAdmin(securityContext);
+    authorizer.authorizeAdmin(ApplicationSecurityContext.of(securityContext));
     User user =
         userRepository.getByName(null, securityContext.getUserPrincipal().getName(), userRepository.getFields("id"));
     if (createRequest.getRunMode() == RunMode.BATCH) {
@@ -158,7 +159,7 @@ public class BuildSearchIndexResource {
       @Context UriInfo uriInfo, @Context SecurityContext securityContext, @PathParam("runMode") String runMode)
       throws IOException {
     // Only admins  can issue a reindex request
-    authorizer.authorizeAdmin(securityContext);
+    authorizer.authorizeAdmin(ApplicationSecurityContext.of(securityContext));
     // Check if there is a running job for reindex for requested entity
     String record;
     if (runMode.equals(RunMode.BATCH.toString())) {

@@ -5,6 +5,7 @@ import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.openmetadata.schema.Function;
 import org.openmetadata.schema.type.TagLabel;
+import org.openmetadata.security.ResourceContextInterface;
 import org.openmetadata.service.Entity;
 import org.openmetadata.service.security.policyevaluator.SubjectContext.PolicyContext;
 

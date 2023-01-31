@@ -39,11 +39,11 @@ import javax.ws.rs.core.UriInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.openmetadata.schema.type.DailyCount;
 import org.openmetadata.schema.type.EntityUsage;
+import org.openmetadata.security.Authorizer;
 import org.openmetadata.service.Entity;
 import org.openmetadata.service.jdbi3.CollectionDAO;
 import org.openmetadata.service.jdbi3.UsageRepository;
 import org.openmetadata.service.resources.Collection;
-import org.openmetadata.service.security.Authorizer;
 import org.openmetadata.service.util.RestUtil;
 
 @Slf4j

@@ -61,6 +61,7 @@ import org.openmetadata.schema.entity.alerts.TriggerConfig;
 import org.openmetadata.schema.type.EntityHistory;
 import org.openmetadata.schema.type.Function;
 import org.openmetadata.schema.type.Include;
+import org.openmetadata.security.Authorizer;
 import org.openmetadata.service.Entity;
 import org.openmetadata.service.OpenMetadataApplicationConfig;
 import org.openmetadata.service.alerts.ActivityFeedAlertCache;
@@ -74,7 +75,7 @@ import org.openmetadata.service.resources.Collection;
 import org.openmetadata.service.resources.EntityResource;
 import org.openmetadata.service.resources.policies.PolicyResource;
 import org.openmetadata.service.resources.settings.SettingsResource;
-import org.openmetadata.service.security.Authorizer;
+import org.openmetadata.service.security.ApplicationSecurityContext;
 import org.openmetadata.service.util.EntityUtil;
 import org.openmetadata.service.util.JsonUtils;
 import org.openmetadata.service.util.ResultList;
@@ -318,7 +319,7 @@ public class AlertResource extends EntityResource<Alert, AlertRepository> {
       })
   public List<TriggerConfig> getAlertBootstrapFilters(
       @Context UriInfo uriInfo, @Context SecurityContext securityContext) {
-    authorizer.authorizeAdmin(securityContext);
+    authorizer.authorizeAdmin(ApplicationSecurityContext.of(securityContext));
     return getDefaultAlertTriggers();
   }
 

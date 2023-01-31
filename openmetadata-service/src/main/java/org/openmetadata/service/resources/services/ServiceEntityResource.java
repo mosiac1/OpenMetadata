@@ -22,12 +22,13 @@ import org.openmetadata.annotations.utils.AnnotationChecker;
 import org.openmetadata.schema.ServiceConnectionEntityInterface;
 import org.openmetadata.schema.ServiceEntityInterface;
 import org.openmetadata.schema.entity.services.ServiceType;
+import org.openmetadata.security.Authorizer;
 import org.openmetadata.service.exception.UnhandledServerException;
 import org.openmetadata.service.jdbi3.ServiceEntityRepository;
 import org.openmetadata.service.resources.EntityResource;
 import org.openmetadata.service.secrets.SecretsManager;
 import org.openmetadata.service.secrets.SecretsManagerFactory;
-import org.openmetadata.service.security.Authorizer;
+import org.openmetadata.service.security.ApplicationSecurityContext;
 import org.openmetadata.service.util.JsonUtils;
 import org.openmetadata.service.util.ResultList;
 
@@ -49,7 +50,7 @@ public abstract class ServiceEntityResource<
   }
 
   protected T decryptOrNullify(SecurityContext securityContext, T service) {
-    if (!authorizer.decryptSecret(securityContext)) {
+    if (!authorizer.decryptSecret(ApplicationSecurityContext.of(securityContext))) {
       return nullifyRequiredConnectionParameters(service);
     }
     service.getConnection().setConfig(retrieveServiceConnectionConfig(service));

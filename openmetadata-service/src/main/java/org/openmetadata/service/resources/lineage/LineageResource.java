@@ -49,13 +49,14 @@ import org.openmetadata.schema.type.EntityLineage;
 import org.openmetadata.schema.type.EntityReference;
 import org.openmetadata.schema.type.MetadataOperation;
 import org.openmetadata.schema.type.TagLabel;
+import org.openmetadata.security.Authorizer;
+import org.openmetadata.security.ResourceContextInterface;
 import org.openmetadata.service.Entity;
 import org.openmetadata.service.jdbi3.CollectionDAO;
 import org.openmetadata.service.jdbi3.LineageRepository;
 import org.openmetadata.service.resources.Collection;
-import org.openmetadata.service.security.Authorizer;
+import org.openmetadata.service.security.ApplicationSecurityContext;
 import org.openmetadata.service.security.policyevaluator.OperationContext;
-import org.openmetadata.service.security.policyevaluator.ResourceContextInterface;
 
 @Path("/v1/lineage")
 @Api(value = "Lineage resource", tags = "Lineage resource")
@@ -171,7 +172,9 @@ public class LineageResource {
       @Context UriInfo uriInfo, @Context SecurityContext securityContext, @Valid AddLineage addLineage)
       throws IOException {
     authorizer.authorize(
-        securityContext, new OperationContext("lineage", MetadataOperation.EDIT_LINEAGE), new LineageResourceContext());
+        ApplicationSecurityContext.of(securityContext),
+        new OperationContext("lineage", MetadataOperation.EDIT_LINEAGE),
+        new LineageResourceContext());
     dao.addLineage(addLineage);
     return Response.status(Status.OK).build();
   }
@@ -208,7 +211,9 @@ public class LineageResource {
           String toId)
       throws IOException {
     authorizer.authorize(
-        securityContext, new OperationContext("lineage", MetadataOperation.EDIT_LINEAGE), new LineageResourceContext());
+        ApplicationSecurityContext.of(securityContext),
+        new OperationContext("lineage", MetadataOperation.EDIT_LINEAGE),
+        new LineageResourceContext());
 
     boolean deleted = dao.deleteLineage(fromEntity, fromId, toEntity, toId);
     if (!deleted) {

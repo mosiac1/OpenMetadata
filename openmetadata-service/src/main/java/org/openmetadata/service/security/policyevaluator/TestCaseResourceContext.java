@@ -24,6 +24,7 @@ import org.openmetadata.schema.tests.TestCase;
 import org.openmetadata.schema.type.EntityReference;
 import org.openmetadata.schema.type.Include;
 import org.openmetadata.schema.type.TagLabel;
+import org.openmetadata.security.ResourceContextInterface;
 import org.openmetadata.service.Entity;
 import org.openmetadata.service.jdbi3.EntityRepository;
 import org.openmetadata.service.resources.feeds.MessageParser.EntityLink;

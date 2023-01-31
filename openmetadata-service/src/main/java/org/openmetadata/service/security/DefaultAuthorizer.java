@@ -18,27 +18,34 @@ import static org.openmetadata.service.exception.CatalogExceptionMessage.notAdmi
 
 import java.io.IOException;
 import java.util.List;
-import javax.ws.rs.core.SecurityContext;
 import lombok.extern.slf4j.Slf4j;
-import org.jdbi.v3.core.Jdbi;
 import org.openmetadata.schema.type.ResourcePermission;
+import org.openmetadata.security.AuthorizationException;
+import org.openmetadata.security.Authorizer;
+import org.openmetadata.security.OperationContextInterface;
+import org.openmetadata.security.ResourceContextInterface;
+import org.openmetadata.security.SecurityContextInterface;
 import org.openmetadata.service.OpenMetadataApplicationConfig;
-import org.openmetadata.service.security.policyevaluator.OperationContext;
 import org.openmetadata.service.security.policyevaluator.PolicyEvaluator;
-import org.openmetadata.service.security.policyevaluator.ResourceContextInterface;
 import org.openmetadata.service.security.policyevaluator.SubjectCache;
 import org.openmetadata.service.security.policyevaluator.SubjectContext;
 
 @Slf4j
 public class DefaultAuthorizer implements Authorizer {
+  private final OpenMetadataApplicationConfig openMetadataApplicationConfig;
 
-  @Override
-  public void init(OpenMetadataApplicationConfig config, Jdbi dbi) {
-    LOG.info("Initializing DefaultAuthorizer with config {}", config.getAuthorizerConfiguration());
+  public DefaultAuthorizer(OpenMetadataApplicationConfig config) {
+    this.openMetadataApplicationConfig = config;
   }
 
   @Override
-  public List<ResourcePermission> listPermissions(SecurityContext securityContext, String user) {
+  public void init() {
+    LOG.info(
+        "Initializing DefaultAuthorizer with config {}", openMetadataApplicationConfig.getAuthorizerConfiguration());
+  }
+
+  @Override
+  public List<ResourcePermission> listPermissions(SecurityContextInterface securityContext, String user) {
     SubjectContext subjectContext = getSubjectContext(securityContext);
     subjectContext = changeSubjectContext(user, subjectContext);
     return subjectContext.isAdmin()
@@ -47,7 +54,7 @@ public class DefaultAuthorizer implements Authorizer {
   }
 
   @Override
-  public ResourcePermission getPermission(SecurityContext securityContext, String user, String resourceType) {
+  public ResourcePermission getPermission(SecurityContextInterface securityContext, String user, String resourceType) {
     SubjectContext subjectContext = getSubjectContext(securityContext);
     subjectContext = changeSubjectContext(user, subjectContext);
     return subjectContext.isAdmin()
@@ -57,7 +64,7 @@ public class DefaultAuthorizer implements Authorizer {
 
   @Override
   public ResourcePermission getPermission(
-      SecurityContext securityContext, String user, ResourceContextInterface resourceContext) {
+      SecurityContextInterface securityContext, String user, ResourceContextInterface resourceContext) {
     SubjectContext subjectContext = getSubjectContext(securityContext);
     subjectContext = changeSubjectContext(user, subjectContext);
     return subjectContext.isAdmin()
@@ -67,7 +74,9 @@ public class DefaultAuthorizer implements Authorizer {
 
   @Override
   public void authorize(
-      SecurityContext securityContext, OperationContext operationContext, ResourceContextInterface resourceContext)
+      SecurityContextInterface securityContext,
+      OperationContextInterface operationContext,
+      ResourceContextInterface resourceContext)
       throws IOException {
     SubjectContext subjectContext = getSubjectContext(securityContext);
     if (subjectContext.isAdmin()) {
@@ -77,7 +86,7 @@ public class DefaultAuthorizer implements Authorizer {
   }
 
   @Override
-  public void authorizeAdmin(SecurityContext securityContext) {
+  public void authorizeAdmin(SecurityContextInterface securityContext) {
     SubjectContext subjectContext = getSubjectContext(securityContext);
     if (subjectContext.isAdmin()) {
       return;
@@ -86,12 +95,12 @@ public class DefaultAuthorizer implements Authorizer {
   }
 
   @Override
-  public boolean decryptSecret(SecurityContext securityContext) {
+  public boolean decryptSecret(SecurityContextInterface securityContext) {
     SubjectContext subjectContext = getSubjectContext(securityContext);
     return subjectContext.isAdmin() || subjectContext.isBot();
   }
 
-  public static SubjectContext getSubjectContext(SecurityContext securityContext) {
+  public static SubjectContext getSubjectContext(SecurityContextInterface securityContext) {
     if (securityContext == null || securityContext.getUserPrincipal() == null) {
       throw new AuthenticationException("No principal in security context");
     }

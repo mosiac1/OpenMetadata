@@ -42,11 +42,12 @@ import javax.ws.rs.core.UriInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.openmetadata.common.utils.CommonUtil;
 import org.openmetadata.schema.settings.Settings;
+import org.openmetadata.security.Authorizer;
 import org.openmetadata.service.OpenMetadataApplicationConfig;
 import org.openmetadata.service.jdbi3.CollectionDAO;
 import org.openmetadata.service.jdbi3.SettingsRepository;
 import org.openmetadata.service.resources.Collection;
-import org.openmetadata.service.security.Authorizer;
+import org.openmetadata.service.security.ApplicationSecurityContext;
 import org.openmetadata.service.util.EntityUtil;
 import org.openmetadata.service.util.JsonUtils;
 import org.openmetadata.service.util.ResultList;
@@ -124,7 +125,7 @@ public class SettingsResource {
             content = @Content(mediaType = "application/json", schema = @Schema(implementation = SettingsList.class)))
       })
   public ResultList<Settings> list(@Context UriInfo uriInfo, @Context SecurityContext securityContext) {
-    authorizer.authorizeAdmin(securityContext);
+    authorizer.authorizeAdmin(ApplicationSecurityContext.of(securityContext));
     return settingsRepository.listAllConfigs();
   }
 
@@ -145,7 +146,7 @@ public class SettingsResource {
       @Context UriInfo uriInfo,
       @Context SecurityContext securityContext,
       @PathParam("settingName") String settingName) {
-    authorizer.authorizeAdmin(securityContext);
+    authorizer.authorizeAdmin(ApplicationSecurityContext.of(securityContext));
     return settingsRepository.getConfigWithKey(settingName);
   }
 
@@ -163,7 +164,7 @@ public class SettingsResource {
       })
   public Response createOrUpdateSetting(
       @Context UriInfo uriInfo, @Context SecurityContext securityContext, @Valid Settings settingName) {
-    authorizer.authorizeAdmin(securityContext);
+    authorizer.authorizeAdmin(ApplicationSecurityContext.of(securityContext));
     return settingsRepository.createOrUpdate(settingName);
   }
 
@@ -190,7 +191,7 @@ public class SettingsResource {
                         @ExampleObject("[" + "{op:remove, path:/a}," + "{op:add, path: /b, value: val}" + "]")
                       }))
           JsonPatch patch) {
-    authorizer.authorizeAdmin(securityContext);
+    authorizer.authorizeAdmin(ApplicationSecurityContext.of(securityContext));
     return settingsRepository.patchSetting(settingName, patch);
   }
 }

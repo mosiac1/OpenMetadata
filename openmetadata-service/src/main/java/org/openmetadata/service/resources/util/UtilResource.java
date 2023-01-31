@@ -20,11 +20,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.openmetadata.schema.type.Include;
 import org.openmetadata.schema.util.EntitiesCount;
 import org.openmetadata.schema.util.ServicesCount;
+import org.openmetadata.security.Authorizer;
 import org.openmetadata.service.jdbi3.CollectionDAO;
 import org.openmetadata.service.jdbi3.ListFilter;
 import org.openmetadata.service.jdbi3.UtilRepository;
 import org.openmetadata.service.resources.Collection;
-import org.openmetadata.service.security.Authorizer;
 
 @Path("/v1/util")
 @Api(value = "Util collection", tags = "Util collection")

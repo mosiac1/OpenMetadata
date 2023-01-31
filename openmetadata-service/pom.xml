@@ -39,6 +39,11 @@
       <version>${project.version}</version>
     </dependency>
     <dependency>
+      <groupId>org.open-metadata</groupId>
+      <artifactId>openmetadata-authorization</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
       <groupId>org.antlr</groupId>
       <artifactId>antlr4-runtime</artifactId>
     </dependency>

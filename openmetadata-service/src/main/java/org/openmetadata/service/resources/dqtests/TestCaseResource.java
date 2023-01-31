@@ -43,6 +43,8 @@ import org.openmetadata.schema.tests.type.TestCaseResult;
 import org.openmetadata.schema.type.EntityHistory;
 import org.openmetadata.schema.type.Include;
 import org.openmetadata.schema.type.MetadataOperation;
+import org.openmetadata.security.Authorizer;
+import org.openmetadata.security.ResourceContextInterface;
 import org.openmetadata.service.Entity;
 import org.openmetadata.service.jdbi3.CollectionDAO;
 import org.openmetadata.service.jdbi3.ListFilter;
@@ -50,9 +52,8 @@ import org.openmetadata.service.jdbi3.TestCaseRepository;
 import org.openmetadata.service.resources.Collection;
 import org.openmetadata.service.resources.EntityResource;
 import org.openmetadata.service.resources.feeds.MessageParser.EntityLink;
-import org.openmetadata.service.security.Authorizer;
+import org.openmetadata.service.security.ApplicationSecurityContext;
 import org.openmetadata.service.security.policyevaluator.OperationContext;
-import org.openmetadata.service.security.policyevaluator.ResourceContextInterface;
 import org.openmetadata.service.security.policyevaluator.TestCaseResourceContext;
 import org.openmetadata.service.util.EntityUtil.Fields;
 import org.openmetadata.service.util.RestUtil;
@@ -330,7 +331,7 @@ public class TestCaseResource extends EntityResource<TestCase, TestCaseRepositor
     TestCase test = getTestCase(create, securityContext.getUserPrincipal().getName(), entityLink);
     OperationContext operationContext = new OperationContext(Entity.TABLE, MetadataOperation.EDIT_TESTS);
     ResourceContextInterface resourceContext = TestCaseResourceContext.builder().entityLink(entityLink).build();
-    authorizer.authorize(securityContext, operationContext, resourceContext);
+    authorizer.authorize(ApplicationSecurityContext.of(securityContext), operationContext, resourceContext);
     test = addHref(uriInfo, dao.create(uriInfo, test));
     LOG.info("Created {}:{}", Entity.getEntityTypeFromObject(test), test.getId());
     return Response.created(test.getHref()).entity(test).build();
@@ -362,7 +363,7 @@ public class TestCaseResource extends EntityResource<TestCase, TestCaseRepositor
     // Override OperationContext to change the entity to table and operation from UPDATE to EDIT_TESTS
     ResourceContextInterface resourceContext = TestCaseResourceContext.builder().id(id).build();
     OperationContext operationContext = new OperationContext(Entity.TABLE, MetadataOperation.EDIT_TESTS);
-    authorizer.authorize(securityContext, operationContext, resourceContext);
+    authorizer.authorize(ApplicationSecurityContext.of(securityContext), operationContext, resourceContext);
     PatchResponse<TestCase> response = dao.patch(uriInfo, id, securityContext.getUserPrincipal().getName(), patch);
     addHref(uriInfo, response.getEntity());
     return response.toResponse();
@@ -387,7 +388,7 @@ public class TestCaseResource extends EntityResource<TestCase, TestCaseRepositor
     EntityLink entityLink = EntityLink.parse(create.getEntityLink());
     ResourceContextInterface resourceContext = TestCaseResourceContext.builder().entityLink(entityLink).build();
     OperationContext operationContext = new OperationContext(Entity.TABLE, MetadataOperation.EDIT_TESTS);
-    authorizer.authorize(securityContext, operationContext, resourceContext);
+    authorizer.authorize(ApplicationSecurityContext.of(securityContext), operationContext, resourceContext);
     TestCase test = getTestCase(create, securityContext.getUserPrincipal().getName(), entityLink);
 
     dao.prepareInternal(test);
@@ -419,7 +420,7 @@ public class TestCaseResource extends EntityResource<TestCase, TestCaseRepositor
     // Override OperationContext to change the entity to table and operation from DELETE to EDIT_TESTS
     ResourceContextInterface resourceContext = TestCaseResourceContext.builder().id(id).build();
     OperationContext operationContext = new OperationContext(Entity.TABLE, MetadataOperation.EDIT_TESTS);
-    authorizer.authorize(securityContext, operationContext, resourceContext);
+    authorizer.authorize(ApplicationSecurityContext.of(securityContext), operationContext, resourceContext);
     DeleteResponse<TestCase> response = dao.delete(securityContext.getUserPrincipal().getName(), id, false, hardDelete);
     addHref(uriInfo, response.getEntity());
     return response.toResponse();
@@ -465,7 +466,7 @@ public class TestCaseResource extends EntityResource<TestCase, TestCaseRepositor
       throws IOException {
     ResourceContextInterface resourceContext = TestCaseResourceContext.builder().name(fqn).build();
     OperationContext operationContext = new OperationContext(Entity.TABLE, MetadataOperation.EDIT_TESTS);
-    authorizer.authorize(securityContext, operationContext, resourceContext);
+    authorizer.authorize(ApplicationSecurityContext.of(securityContext), operationContext, resourceContext);
     return dao.addTestCaseResult(securityContext.getUserPrincipal().getName(), uriInfo, fqn, testCaseResult)
         .toResponse();
   }
@@ -531,7 +532,7 @@ public class TestCaseResource extends EntityResource<TestCase, TestCaseRepositor
       throws IOException {
     ResourceContextInterface resourceContext = TestCaseResourceContext.builder().name(fqn).build();
     OperationContext operationContext = new OperationContext(Entity.TABLE, MetadataOperation.EDIT_TESTS);
-    authorizer.authorize(securityContext, operationContext, resourceContext);
+    authorizer.authorize(ApplicationSecurityContext.of(securityContext), operationContext, resourceContext);
     return dao.deleteTestCaseResult(securityContext.getUserPrincipal().getName(), fqn, timestamp).toResponse();
   }
 

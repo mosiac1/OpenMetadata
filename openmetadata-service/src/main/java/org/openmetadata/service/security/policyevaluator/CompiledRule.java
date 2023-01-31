@@ -13,9 +13,11 @@ import org.openmetadata.schema.type.MetadataOperation;
 import org.openmetadata.schema.type.Permission;
 import org.openmetadata.schema.type.Permission.Access;
 import org.openmetadata.schema.type.ResourcePermission;
+import org.openmetadata.security.AuthorizationException;
+import org.openmetadata.security.OperationContextInterface;
+import org.openmetadata.security.ResourceContextInterface;
 import org.openmetadata.service.exception.CatalogExceptionMessage;
 import org.openmetadata.service.resources.CollectionRegistry;
-import org.openmetadata.service.security.AuthorizationException;
 import org.openmetadata.service.security.policyevaluator.SubjectContext.PolicyContext;
 import org.springframework.expression.Expression;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
@@ -83,7 +85,7 @@ public class CompiledRule extends Rule {
   }
 
   public void evaluateDenyRule(
-      OperationContext operationContext,
+      OperationContextInterface operationContext,
       SubjectContext subjectContext,
       ResourceContextInterface resourceContext,
       PolicyContext policyContext) {
@@ -121,7 +123,7 @@ public class CompiledRule extends Rule {
   }
 
   public void evaluateAllowRule(
-      OperationContext operationContext,
+      OperationContextInterface operationContext,
       SubjectContext subjectContext,
       ResourceContextInterface resourceContext,
       PolicyContext policyContext) {

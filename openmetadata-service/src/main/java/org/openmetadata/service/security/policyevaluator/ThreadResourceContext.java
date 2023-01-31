@@ -4,6 +4,7 @@ import java.util.List;
 import org.openmetadata.schema.EntityInterface;
 import org.openmetadata.schema.type.EntityReference;
 import org.openmetadata.schema.type.TagLabel;
+import org.openmetadata.security.ResourceContextInterface;
 import org.openmetadata.service.Entity;
 
 /** Conversation threads require special handling */

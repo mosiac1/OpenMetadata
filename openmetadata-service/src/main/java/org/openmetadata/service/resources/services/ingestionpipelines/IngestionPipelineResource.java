@@ -61,6 +61,8 @@ import org.openmetadata.schema.services.connections.metadata.OpenMetadataConnect
 import org.openmetadata.schema.type.EntityHistory;
 import org.openmetadata.schema.type.Include;
 import org.openmetadata.schema.type.MetadataOperation;
+import org.openmetadata.security.AuthorizationException;
+import org.openmetadata.security.Authorizer;
 import org.openmetadata.service.Entity;
 import org.openmetadata.service.OpenMetadataApplicationConfig;
 import org.openmetadata.service.airflow.AirflowRESTClient;
@@ -71,8 +73,7 @@ import org.openmetadata.service.resources.Collection;
 import org.openmetadata.service.resources.EntityResource;
 import org.openmetadata.service.secrets.SecretsManager;
 import org.openmetadata.service.secrets.SecretsManagerFactory;
-import org.openmetadata.service.security.AuthorizationException;
-import org.openmetadata.service.security.Authorizer;
+import org.openmetadata.service.security.ApplicationSecurityContext;
 import org.openmetadata.service.security.policyevaluator.OperationContext;
 import org.openmetadata.service.util.EntityUtil.Fields;
 import org.openmetadata.service.util.OpenMetadataConnectionBuilder;
@@ -629,7 +630,8 @@ public class IngestionPipelineResource extends EntityResource<IngestionPipeline,
       @Valid PipelineStatus pipelineStatus)
       throws IOException {
     OperationContext operationContext = new OperationContext(entityType, MetadataOperation.EDIT_ALL);
-    authorizer.authorize(securityContext, operationContext, getResourceContextByName(fqn));
+    authorizer.authorize(
+        ApplicationSecurityContext.of(securityContext), operationContext, getResourceContextByName(fqn));
     return dao.addPipelineStatus(uriInfo, fqn, pipelineStatus).toResponse();
   }
 
@@ -694,7 +696,8 @@ public class IngestionPipelineResource extends EntityResource<IngestionPipeline,
       @Parameter(description = "Pipeline Status Run Id", schema = @Schema(type = "string")) @PathParam("id") UUID runId)
       throws IOException {
     OperationContext operationContext = new OperationContext(entityType, MetadataOperation.EDIT_ALL);
-    authorizer.authorize(securityContext, operationContext, getResourceContextByName(fqn));
+    authorizer.authorize(
+        ApplicationSecurityContext.of(securityContext), operationContext, getResourceContextByName(fqn));
     return dao.getPipelineStatus(fqn, runId);
   }
 
@@ -714,7 +717,7 @@ public class IngestionPipelineResource extends EntityResource<IngestionPipeline,
     SecretsManager secretsManager = SecretsManagerFactory.getSecretsManager();
     try {
       authorizer.authorize(
-          securityContext,
+          ApplicationSecurityContext.of(securityContext),
           new OperationContext(entityType, MetadataOperation.VIEW_ALL),
           getResourceContextById(ingestionPipeline.getId()));
     } catch (AuthorizationException | IOException e) {

@@ -25,10 +25,10 @@ import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.openmetadata.schema.analytics.ReportData;
 import org.openmetadata.schema.analytics.ReportData.ReportDataType;
+import org.openmetadata.security.Authorizer;
 import org.openmetadata.service.jdbi3.CollectionDAO;
 import org.openmetadata.service.jdbi3.ReportDataRepository;
 import org.openmetadata.service.resources.Collection;
-import org.openmetadata.service.security.Authorizer;
 import org.openmetadata.service.util.ResultList;
 
 @Slf4j

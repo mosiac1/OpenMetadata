@@ -16,51 +16,53 @@ package org.openmetadata.service.security;
 import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
-import javax.ws.rs.core.SecurityContext;
 import lombok.extern.slf4j.Slf4j;
-import org.jdbi.v3.core.Jdbi;
 import org.openmetadata.schema.entity.teams.User;
 import org.openmetadata.schema.type.Permission.Access;
 import org.openmetadata.schema.type.ResourcePermission;
+import org.openmetadata.security.Authorizer;
+import org.openmetadata.security.OperationContextInterface;
+import org.openmetadata.security.ResourceContextInterface;
+import org.openmetadata.security.SecurityContextInterface;
 import org.openmetadata.service.Entity;
 import org.openmetadata.service.OpenMetadataApplicationConfig;
 import org.openmetadata.service.exception.EntityNotFoundException;
 import org.openmetadata.service.jdbi3.EntityRepository;
-import org.openmetadata.service.security.policyevaluator.OperationContext;
 import org.openmetadata.service.security.policyevaluator.PolicyEvaluator;
-import org.openmetadata.service.security.policyevaluator.ResourceContextInterface;
 import org.openmetadata.service.security.policyevaluator.SubjectCache;
 import org.openmetadata.service.util.EntityUtil.Fields;
 import org.openmetadata.service.util.RestUtil;
 
 @Slf4j
 public class NoopAuthorizer implements Authorizer {
-  @Override
-  public void init(OpenMetadataApplicationConfig openMetadataApplicationConfig, Jdbi jdbi) {
+
+  public NoopAuthorizer(OpenMetadataApplicationConfig openMetadataApplicationConfig) {
     SubjectCache.initialize();
     addAnonymousUser();
   }
 
   @Override
-  public List<ResourcePermission> listPermissions(SecurityContext securityContext, String user) {
+  public List<ResourcePermission> listPermissions(SecurityContextInterface securityContext, String user) {
     // Return all operations.
     return PolicyEvaluator.getResourcePermissions(Access.ALLOW);
   }
 
   @Override
-  public ResourcePermission getPermission(SecurityContext securityContext, String user, String resource) {
+  public ResourcePermission getPermission(SecurityContextInterface securityContext, String user, String resource) {
     return PolicyEvaluator.getResourcePermission(resource, Access.ALLOW);
   }
 
   @Override
   public ResourcePermission getPermission(
-      SecurityContext securityContext, String user, ResourceContextInterface resourceContext) {
+      SecurityContextInterface securityContext, String user, ResourceContextInterface resourceContext) {
     return PolicyEvaluator.getResourcePermission(resourceContext.getResource(), Access.ALLOW);
   }
 
   @Override
   public void authorize(
-      SecurityContext securityContext, OperationContext operationContext, ResourceContextInterface resourceContext) {
+      SecurityContextInterface securityContext,
+      OperationContextInterface operationContext,
+      ResourceContextInterface resourceContext) {
     /* Always authorize */
   }
 
@@ -95,12 +97,12 @@ public class NoopAuthorizer implements Authorizer {
   }
 
   @Override
-  public void authorizeAdmin(SecurityContext securityContext) {
+  public void authorizeAdmin(SecurityContextInterface securityContext) {
     /* Always authorize */
   }
 
   @Override
-  public boolean decryptSecret(SecurityContext securityContext) {
+  public boolean decryptSecret(SecurityContextInterface securityContext) {
     return true; // Always decrypt
   }
 }

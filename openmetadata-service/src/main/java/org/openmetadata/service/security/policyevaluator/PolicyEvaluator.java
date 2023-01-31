@@ -30,9 +30,11 @@ import org.openmetadata.schema.type.Permission;
 import org.openmetadata.schema.type.Permission.Access;
 import org.openmetadata.schema.type.ResourceDescriptor;
 import org.openmetadata.schema.type.ResourcePermission;
+import org.openmetadata.security.AuthorizationException;
+import org.openmetadata.security.OperationContextInterface;
+import org.openmetadata.security.ResourceContextInterface;
 import org.openmetadata.service.ResourceRegistry;
 import org.openmetadata.service.exception.CatalogExceptionMessage;
-import org.openmetadata.service.security.AuthorizationException;
 import org.openmetadata.service.security.policyevaluator.SubjectContext.PolicyContext;
 import org.openmetadata.service.security.policyevaluator.SubjectContext.PolicyIterator;
 
@@ -61,7 +63,7 @@ public class PolicyEvaluator {
   public static void hasPermission(
       @NonNull SubjectContext subjectContext,
       @NonNull ResourceContextInterface resourceContext,
-      @NonNull OperationContext operationContext)
+      @NonNull OperationContextInterface operationContext)
       throws IOException {
     // First run through all the DENY policies based on the user
     evaluateDenySubjectPolicies(subjectContext, resourceContext, operationContext);
@@ -83,17 +85,23 @@ public class PolicyEvaluator {
   }
 
   private static void evaluateDenySubjectPolicies(
-      SubjectContext subjectContext, ResourceContextInterface resourceContext, OperationContext operationContext) {
+      SubjectContext subjectContext,
+      ResourceContextInterface resourceContext,
+      OperationContextInterface operationContext) {
     evaluatePolicies(subjectContext.getPolicies(), subjectContext, resourceContext, operationContext, true, false);
   }
 
   private static void evaluateAllowSubjectPolicies(
-      SubjectContext subjectContext, ResourceContextInterface resourceContext, OperationContext operationContext) {
+      SubjectContext subjectContext,
+      ResourceContextInterface resourceContext,
+      OperationContextInterface operationContext) {
     evaluatePolicies(subjectContext.getPolicies(), subjectContext, resourceContext, operationContext, false, false);
   }
 
   private static void evaluateDenyResourcePolicies(
-      SubjectContext subjectContext, ResourceContextInterface resourceContext, OperationContext operationContext)
+      SubjectContext subjectContext,
+      ResourceContextInterface resourceContext,
+      OperationContextInterface operationContext)
       throws IOException {
     if (resourceContext == null || resourceContext.getOwner() == null) {
       return; // No owner for a resource. No need to walk the hierarchy of user and teams that are resource owners
@@ -103,7 +111,9 @@ public class PolicyEvaluator {
   }
 
   private static void evaluateAllowResourcePolicies(
-      SubjectContext subjectContext, ResourceContextInterface resourceContext, OperationContext operationContext)
+      SubjectContext subjectContext,
+      ResourceContextInterface resourceContext,
+      OperationContextInterface operationContext)
       throws IOException {
     if (resourceContext == null || resourceContext.getOwner() == null) {
       return; // No owner for a resource. No need to walk the hierarchy of user and teams that are resource owners
@@ -116,7 +126,7 @@ public class PolicyEvaluator {
       Iterator<PolicyContext> policies,
       SubjectContext subjectContext,
       ResourceContextInterface resourceContext,
-      OperationContext operationContext,
+      OperationContextInterface operationContext,
       boolean evaluateDeny,
       boolean evaluateResourcePolicies) {
     // When an operation is allowed by a rule, it is removed from operation context
