@@ -58,6 +58,13 @@
     "enableSecureSocketConnection": {
       "description": "Enable Secure Socket Connection.",
       "type": "boolean"
+    },
+    "extraConfiguration": {
+      "description": "Extra configuration for the authorizer.",
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      }
     }
   },
   "required": ["className", "containerRequestFilter", "adminPrincipals", "principalDomain", "enforcePrincipalDomain", "enableSecureSocketConnection"],

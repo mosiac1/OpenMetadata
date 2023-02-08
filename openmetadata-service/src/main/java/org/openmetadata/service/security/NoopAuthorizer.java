@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
+import org.openmetadata.schema.api.security.AuthorizerConfiguration;
 import org.openmetadata.schema.entity.teams.User;
 import org.openmetadata.schema.type.Permission.Access;
 import org.openmetadata.schema.type.ResourcePermission;
@@ -25,7 +26,6 @@ import org.openmetadata.security.OperationContextInterface;
 import org.openmetadata.security.ResourceContextInterface;
 import org.openmetadata.security.SecurityContextInterface;
 import org.openmetadata.service.Entity;
-import org.openmetadata.service.OpenMetadataApplicationConfig;
 import org.openmetadata.service.exception.EntityNotFoundException;
 import org.openmetadata.service.jdbi3.EntityRepository;
 import org.openmetadata.service.security.policyevaluator.PolicyEvaluator;
@@ -36,7 +36,7 @@ import org.openmetadata.service.util.RestUtil;
 @Slf4j
 public class NoopAuthorizer implements Authorizer {
 
-  public NoopAuthorizer(OpenMetadataApplicationConfig openMetadataApplicationConfig) {
+  public NoopAuthorizer(AuthorizerConfiguration openMetadataApplicationConfig) {
     SubjectCache.initialize();
     addAnonymousUser();
   }

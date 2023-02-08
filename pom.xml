@@ -36,6 +36,7 @@
     <module>openmetadata-dist</module>
     <module>openmetadata-clients</module>
     <module>openmetadata-authorization</module>
+    <module>openmetadata-authorization-ranger</module>
   </modules>
   <packaging>pom</packaging>
 
@@ -515,6 +516,13 @@
         <artifactId>snakeyaml</artifactId>
         <version>1.32</version>
       </dependency>
+
+      <dependency>
+        <groupId>org.apache.commons</groupId>
+        <artifactId>commons-text</artifactId>
+        <version>1.10.0</version>
+      </dependency>
+
     </dependencies>
   </dependencyManagement>
 

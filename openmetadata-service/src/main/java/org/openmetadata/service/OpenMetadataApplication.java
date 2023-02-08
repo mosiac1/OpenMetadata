@@ -295,7 +295,7 @@ public class OpenMetadataApplication extends Application<OpenMetadataApplication
 
       try {
         Class<? extends Authorizer> authorizerClazz = Class.forName(authorizerClazzName).asSubclass(Authorizer.class);
-        authorizer = authorizerClazz.getConstructor(OpenMetadataApplicationConfig.class).newInstance(catalogConfig);
+        authorizer = authorizerClazz.getConstructor(AuthorizerConfiguration.class).newInstance(authorizerConf);
       } catch (NoSuchMethodException | SecurityException e) {
         throw new IllegalArgumentException(
             String.format("Could not find suitable constructor for Authorizer class %s", authorizerClazzName), e);
@@ -309,7 +309,7 @@ public class OpenMetadataApplication extends Application<OpenMetadataApplication
 
     } else {
       LOG.info("Authorizer config not set, setting noop authorizer");
-      authorizer = new NoopAuthorizer(catalogConfig);
+      authorizer = new NoopAuthorizer(authorizerConf);
     }
   }
 

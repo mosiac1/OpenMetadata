@@ -19,29 +19,28 @@ import static org.openmetadata.service.exception.CatalogExceptionMessage.notAdmi
 import java.io.IOException;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
+import org.openmetadata.schema.api.security.AuthorizerConfiguration;
 import org.openmetadata.schema.type.ResourcePermission;
 import org.openmetadata.security.AuthorizationException;
 import org.openmetadata.security.Authorizer;
 import org.openmetadata.security.OperationContextInterface;
 import org.openmetadata.security.ResourceContextInterface;
 import org.openmetadata.security.SecurityContextInterface;
-import org.openmetadata.service.OpenMetadataApplicationConfig;
 import org.openmetadata.service.security.policyevaluator.PolicyEvaluator;
 import org.openmetadata.service.security.policyevaluator.SubjectCache;
 import org.openmetadata.service.security.policyevaluator.SubjectContext;
 
 @Slf4j
 public class DefaultAuthorizer implements Authorizer {
-  private final OpenMetadataApplicationConfig openMetadataApplicationConfig;
+  private final AuthorizerConfiguration authorizerConfiguration;
 
-  public DefaultAuthorizer(OpenMetadataApplicationConfig config) {
-    this.openMetadataApplicationConfig = config;
+  public DefaultAuthorizer(AuthorizerConfiguration config) {
+    this.authorizerConfiguration = config;
   }
 
   @Override
   public void init() {
-    LOG.info(
-        "Initializing DefaultAuthorizer with config {}", openMetadataApplicationConfig.getAuthorizerConfiguration());
+    LOG.info("Initializing DefaultAuthorizer with config {}", authorizerConfiguration);
   }
 
   @Override
