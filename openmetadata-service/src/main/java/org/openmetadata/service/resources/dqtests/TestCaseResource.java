@@ -175,8 +175,18 @@ public class TestCaseResource extends EntityResource<TestCase, TestCaseRepositor
     // Override OperationContext to change the entity to table and operation from VIEW_ALL to VIEW_TESTS
     OperationContext operationContext = new OperationContext(Entity.TABLE, MetadataOperation.VIEW_TESTS);
     Fields fields = getFields(fieldsParam);
-    return super.listInternal(
-        uriInfo, securityContext, fields, filter, limitParam, before, after, operationContext, resourceContext);
+
+    authorizer.authorize(ApplicationSecurityContext.of(securityContext), operationContext, resourceContext);
+
+    ResultList<TestCase> resultList;
+    RestUtil.validateCursors(before, after);
+    if (before != null) {
+      resultList = dao.listBefore(uriInfo, fields, filter, limitParam, before);
+    } else {
+      resultList = dao.listAfter(uriInfo, fields, filter, limitParam, after);
+    }
+
+    return addHref(uriInfo, resultList);
   }
 
   @GET

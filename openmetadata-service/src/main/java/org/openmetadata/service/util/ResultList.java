@@ -42,6 +42,11 @@ public class ResultList<T> {
     this.paging = null;
   }
 
+  public ResultList(List<T> data, Paging paging) {
+    this.data = data;
+    this.paging = paging;
+  }
+
   /**
    * Cursor functionality. User has request 'limit' number of entries. The data provided must have 'limit' + 1 number of
    * entries.

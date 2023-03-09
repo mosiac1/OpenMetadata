@@ -1,0 +1,6 @@
+<configuration>
+  <property>
+    <name>hadoop.security.group.mapping.ldap.url</name>
+    <value>ldap://ldap-test-url:636</value>
+  </property>
+</configuration>

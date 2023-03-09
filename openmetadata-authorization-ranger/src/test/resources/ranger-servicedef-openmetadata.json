@@ -1,0 +1,350 @@
+{
+    "id": 206,
+    "name": "openmetadata",
+    "displayName": "openmetadata",
+    "implClass": "org.apache.ranger.services.openmetadata.RangerServiceOpenmetadata",
+    "label": "OpenMetadata",
+    "description": "OpenMetadata",
+    "guid": "f517cfd0-4275-4485-9d40-895c63f25731",
+    "resources": [
+        {
+            "itemId": 10,
+            "name": "database_service",
+            "type": "string",
+            "level": 10,
+            "parent": "",
+            "mandatory": true,
+            "isValidLeaf": true,
+            "lookupSupported": true,
+            "recursiveSupported": false,
+            "excludesSupported": true,
+            "matcher": "org.apache.ranger.plugin.resourcematcher.RangerDefaultResourceMatcher",
+            "matcherOptions": {
+                "wildCard": true,
+                "ignoreCase": true
+            },
+            "validationRegEx": "",
+            "validationMessage": "",
+            "uiHint": "",
+            "label": "OpenMetadata Database Service",
+            "description": "OpenMetadata Database Service",
+            "accessTypeRestrictions": [
+                "Create",
+                "Delete",
+                "ViewAll",
+                "EditAll",
+                "EditDescription",
+                "EditDisplayName",
+                "EditCustomFields"
+            ]
+        },
+        {
+            "itemId": 12,
+            "name": "database",
+            "type": "string",
+            "level": 20,
+            "parent": "database_service",
+            "mandatory": true,
+            "isValidLeaf": true,
+            "lookupSupported": true,
+            "recursiveSupported": false,
+            "excludesSupported": true,
+            "matcher": "org.apache.ranger.plugin.resourcematcher.RangerDefaultResourceMatcher",
+            "matcherOptions": {
+                "wildCard": true,
+                "ignoreCase": true
+            },
+            "validationRegEx": "",
+            "validationMessage": "",
+            "uiHint": "",
+            "label": "OpenMetadata Database",
+            "description": "OpenMetadata Database",
+            "accessTypeRestrictions": [
+                "Create",
+                "Delete",
+                "ViewAll",
+                "EditAll",
+                "EditDescription",
+                "EditDisplayName",
+                "EditCustomFields"
+            ]
+        },
+        {
+            "itemId": 13,
+            "name": "database_schema",
+            "type": "string",
+            "level": 30,
+            "parent": "database",
+            "mandatory": true,
+            "isValidLeaf": true,
+            "lookupSupported": true,
+            "recursiveSupported": false,
+            "excludesSupported": true,
+            "matcher": "org.apache.ranger.plugin.resourcematcher.RangerDefaultResourceMatcher",
+            "matcherOptions": {
+                "wildCard": true,
+                "ignoreCase": true
+            },
+            "validationRegEx": "",
+            "validationMessage": "",
+            "uiHint": "",
+            "label": "OpenMetadata Database Schema",
+            "description": "OpenMetadata Database Schema",
+            "accessTypeRestrictions": [
+                "Create",
+                "Delete",
+                "ViewAll",
+                "EditAll",
+                "EditDescription",
+                "EditDisplayName",
+                "EditCustomFields"
+            ]
+        },
+        {
+            "itemId": 14,
+            "name": "table",
+            "type": "string",
+            "level": 40,
+            "parent": "database_schema",
+            "mandatory": true,
+            "isValidLeaf": true,
+            "lookupSupported": true,
+            "recursiveSupported": false,
+            "excludesSupported": true,
+            "matcher": "org.apache.ranger.plugin.resourcematcher.RangerDefaultResourceMatcher",
+            "matcherOptions": {
+                "wildCard": true,
+                "ignoreCase": true
+            },
+            "validationRegEx": "",
+            "validationMessage": "",
+            "uiHint": "",
+            "label": "OpenMetadata Table",
+            "description": "OpenMetadata Table",
+            "accessTypeRestrictions": [
+                "Create",
+                "Delete",
+                "ViewAll",
+                "ViewUsage",
+                "ViewTests",
+                "ViewQueries",
+                "ViewDataProfile",
+                "ViewSampleData",
+                "EditAll",
+                "EditDescription",
+                "EditDisplayName",
+                "EditTags",
+                "EditOwner",
+                "EditCustomFields",
+                "EditTests",
+                "EditQueries",
+                "EditDataProfile",
+                "EditSampleData",
+                "EditLineage"
+            ]
+        }
+    ],
+    "accessTypes": [
+        {
+            "itemId": 1,
+            "name": "ViewAll",
+            "label": "View",
+            "impliedGrants": [
+                "ViewUsage",
+                "ViewTests",
+                "ViewQueries",
+                "ViewDataProfile",
+                "ViewSampleData",
+                "ViewBasic"
+            ]
+        },
+        {
+            "itemId": 11,
+            "name": "ViewUsage",
+            "label": "View Usage",
+            "impliedGrants": []
+        },
+        {
+            "itemId": 12,
+            "name": "ViewTests",
+            "label": "View Tests",
+            "impliedGrants": []
+        },
+        {
+            "itemId": 13,
+            "name": "ViewQueries",
+            "label": "View Queries",
+            "impliedGrants": []
+        },
+        {
+            "itemId": 14,
+            "name": "ViewDataProfile",
+            "label": "View Data Profile",
+            "impliedGrants": []
+        },
+        {
+            "itemId": 15,
+            "name": "ViewSampleData",
+            "label": "View Sample Data",
+            "impliedGrants": []
+        },
+        {
+            "itemId": 16,
+            "name": "ViewBasic",
+            "label": "View Basic Data",
+            "impliedGrants": []
+        },
+        {
+            "itemId": 2,
+            "name": "Create",
+            "label": "Create",
+            "impliedGrants": []
+        },
+        {
+            "itemId": 3,
+            "name": "Delete",
+            "label": "Delete",
+            "impliedGrants": []
+        },
+        {
+            "itemId": 4,
+            "name": "EditAll",
+            "label": "Edit",
+            "impliedGrants": [
+                "EditDescription",
+                "EditDisplayName",
+                "EditCustomFields",
+                "EditTags",
+                "EditOwner",
+                "EditTier",
+                "EditLineage",
+                "EditStatus",
+                "EditReviewers",
+                "EditTests",
+                "EditQueries",
+                "EditDataProfile",
+                "EditSampleData",
+                "EditUsers"
+            ]
+        },
+        {
+            "itemId": 401,
+            "name": "EditDescription",
+            "label": "Edit Description",
+            "impliedGrants": []
+        },
+        {
+            "itemId": 402,
+            "name": "EditDisplayName",
+            "label": "Edit Display Name",
+            "impliedGrants": []
+        },
+        {
+            "itemId": 403,
+            "name": "EditCustomFields",
+            "label": "Edit Custom Fields",
+            "impliedGrants": []
+        },
+        {
+            "itemId": 404,
+            "name": "EditTags",
+            "label": "Edit Tags",
+            "impliedGrants": []
+        },
+        {
+            "itemId": 405,
+            "name": "EditOwner",
+            "label": "Edit Owner",
+            "impliedGrants": []
+        },
+        {
+            "itemId": 406,
+            "name": "EditTier",
+            "label": "Edit Tier",
+            "impliedGrants": []
+        },
+        {
+            "itemId": 407,
+            "name": "EditLineage",
+            "label": "Edit Lineage",
+            "impliedGrants": []
+        },
+        {
+            "itemId": 408,
+            "name": "EditStatus",
+            "label": "Edit Status",
+            "impliedGrants": []
+        },
+        {
+            "itemId": 409,
+            "name": "EditReviewers",
+            "label": "Edit Reviewers",
+            "impliedGrants": []
+        },
+        {
+            "itemId": "410",
+            "name": "EditTests",
+            "label": "Edit Tests",
+            "impliedGrants": []
+        },
+        {
+            "itemId": 411,
+            "name": "EditQueries",
+            "label": "Edit Queries",
+            "impliedGrants": []
+        },
+        {
+            "itemId": 412,
+            "name": "EditDataProfile",
+            "label": "Edit Data Profile",
+            "impliedGrants": []
+        },
+        {
+            "itemId": 413,
+            "name": "EditSampleData",
+            "label": "Edit Sample Data",
+            "impliedGrants": []
+        },
+        {
+            "itemId": 414,
+            "name": "EditUsers",
+            "label": "Edit Users",
+            "impliedGrants": []
+        }
+    ],
+    "configs": [
+        {
+            "itemId": 1,
+            "name": "username",
+            "type": "string",
+            "mandatory": true,
+            "validationRegEx": "",
+            "validationMessage": "",
+            "uiHint": "",
+            "label": "Username"
+        },
+        {
+            "itemId": 2,
+            "name": "endpoint",
+            "type": "string",
+            "mandatory": true,
+            "validationRegEx": "",
+            "validationMessage": "",
+            "label": "OpenMetadata API endpoint",
+            "uiHint": ""
+        },
+        {
+            "itemId": 3,
+            "name": "token",
+            "type": "string",
+            "mandatory": true,
+            "validationRegEx": "",
+            "validationMessage": "",
+            "label": "User JWT token",
+            "uiHint": ""
+        }
+    ],
+    "enums": [],
+    "contextEnrichers": [],
+    "policyConditions": []
+}

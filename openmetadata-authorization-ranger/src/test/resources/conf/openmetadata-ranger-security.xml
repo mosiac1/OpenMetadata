@@ -1,0 +1,6 @@
+<configuration>
+  <property>
+    <name>ranger.plugin.openmetadata.service.name</name>
+    <value>test_value</value>
+  </property>
+</configuration>

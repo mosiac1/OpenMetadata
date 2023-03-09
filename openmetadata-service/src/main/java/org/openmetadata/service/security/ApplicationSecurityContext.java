@@ -16,9 +16,11 @@ package org.openmetadata.service.security;
 import java.security.Principal;
 import javax.ws.rs.core.SecurityContext;
 import lombok.Builder;
+import lombok.ToString;
 import org.openmetadata.security.SecurityContextInterface;
 
 @Builder
+@ToString
 public class ApplicationSecurityContext implements SecurityContextInterface {
 
   private final SecurityContext securityContext;

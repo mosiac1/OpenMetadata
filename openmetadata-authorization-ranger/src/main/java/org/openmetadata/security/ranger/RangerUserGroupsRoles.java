@@ -11,14 +11,15 @@
  *  limitations under the License.
  */
 
-package org.openmetadata.security;
+package org.openmetadata.security.ranger;
 
-import java.util.List;
-import org.openmetadata.schema.type.MetadataOperation;
+import java.util.Set;
+import lombok.Data;
 
-public interface OperationContextInterface {
+@Data
+public class RangerUserGroupsRoles {
 
-  String getResource();
-
-  List<MetadataOperation> getOperations();
+  private final String user;
+  private final Set<String> groups;
+  private final Set<String> roles;
 }

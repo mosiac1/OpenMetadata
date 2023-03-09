@@ -1,0 +1,34 @@
+<configuration>
+  <property>
+    <name>ranger.plugin.openmetadata.service.name</name>
+    <value>openmetadata-localhost</value>
+  </property>
+  <property>
+    <name>ranger.plugin.openmetadata.policy.source.impl</name>
+    <value>org.apache.ranger.admin.client.RangerAdminRESTClient</value>
+  </property>
+  <property>
+    <name>ranger.plugin.openmetadata.policy.rest.url</name>
+    <value>http://localhost:6080</value>
+  </property>
+  <property>
+    <name>ranger.plugin.openmetadata.policy.rest.ssl.config.file</name>
+    <value>./conf/ranger/openmetadata-ranger-policymgr-ssl.xml</value>
+  </property>
+  <property>
+    <name>ranger.plugin.openmetadata.policy.pollIntervalMs</name>
+    <value>30000</value>
+  </property>
+  <property>
+    <name>ranger.plugin.openmetadata.policy.rest.client.connection.timeoutMs</name>
+    <value>120000</value>
+  </property>
+  <property>
+    <name>ranger.plugin.openmetadata.policy.rest.client.read.timeoutMs</name>
+    <value>30000</value>
+  </property>
+  <property>
+    <name>ranger.plugin.openmetadata.policy.cache.dir</name>
+    <value>/tmp/ranger/policycache</value>
+  </property>
+</configuration>

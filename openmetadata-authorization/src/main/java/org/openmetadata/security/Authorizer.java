@@ -37,6 +37,19 @@ public interface Authorizer {
       ResourceContextInterface resourceContext)
       throws IOException;
 
+  default boolean checkAuthorization(
+      SecurityContextInterface securityContext,
+      OperationContextInterface operationContext,
+      ResourceContextInterface resourceContext)
+      throws IOException {
+    try {
+      authorize(securityContext, operationContext, resourceContext);
+      return true;
+    } catch (AuthorizationException ignored) {
+      return false;
+    }
+  }
+
   void authorizeAdmin(SecurityContextInterface securityContext);
 
   boolean decryptSecret(SecurityContextInterface securityContext);

@@ -15,16 +15,18 @@ package org.openmetadata.security.ranger;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Map;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang.NotImplementedException;
 import org.apache.hadoop.security.UserGroupInformation;
-import org.apache.ranger.authorization.hadoop.config.RangerPluginConfig;
 import org.apache.ranger.plugin.audit.RangerDefaultAuditHandler;
+import org.apache.ranger.plugin.policyengine.RangerAccessRequest;
+import org.apache.ranger.plugin.policyengine.RangerAccessResource;
+import org.apache.ranger.plugin.policyengine.RangerAccessResult;
 import org.apache.ranger.plugin.service.RangerBasePlugin;
 import org.openmetadata.schema.api.security.AuthorizerConfiguration;
+import org.openmetadata.schema.type.MetadataOperation;
 import org.openmetadata.schema.type.ResourcePermission;
+import org.openmetadata.security.AuthorizationException;
 import org.openmetadata.security.Authorizer;
 import org.openmetadata.security.OperationContextInterface;
 import org.openmetadata.security.ResourceContextInterface;
@@ -33,49 +35,45 @@ import org.openmetadata.security.SecurityContextInterface;
 @Slf4j
 public class RangerAuthorizer implements Authorizer {
 
-  public static final String HADOOP_CONFIGURATION = "hadoop.configuration";
-  public static final String RANGER_SECURITY_CONFIGURATION = "ranger.security.configuration";
-  public static final String RANGER_AUDIT_CONFIGURATION = "ranger.audit.configuration";
-  public static final String RANGER_POLICYMGR_SSL_CONFIGURATION = "ranger.policy-manager-ssl.configuration";
-  public static final String RANGER_OPENMETADATA_SERVICE_TYPE = "openmetadata";
-  public static final String RANGER_SERVICE_NAME = "ranger.service.name";
-
   private final RangerBasePlugin rangerPlugin;
+  private final RangerHadoopUserGroupsRolesProvider groupsRolesProvider;
+
+  private final RangerPermissionsProvider permissionsProvider;
 
   public RangerAuthorizer(AuthorizerConfiguration authorizerConfiguration) {
-    Map<String, String> config = authorizerConfiguration.getExtraConfiguration().getAdditionalProperties();
+    RangerAuthorizerConfigurationProvider configurationProvider =
+        new RangerAuthorizerConfigurationProvider(authorizerConfiguration);
 
-    RangerPluginConfig rangerPluginConfig =
-        new RangerPluginConfig(
-            RANGER_OPENMETADATA_SERVICE_TYPE, config.get(RANGER_SERVICE_NAME), null, null, null, null);
-    List.of(RANGER_SECURITY_CONFIGURATION, RANGER_AUDIT_CONFIGURATION, RANGER_POLICYMGR_SSL_CONFIGURATION)
-        .forEach(c -> rangerPluginConfig.addResourceIfReadable(config.get(c)));
-    rangerPlugin = new RangerBasePlugin(rangerPluginConfig);
+    UserGroupInformation.setConfiguration(configurationProvider.getHadoopConfiguration());
+
+    rangerPlugin = new RangerBasePlugin(configurationProvider.getRangerPluginConfig());
     rangerPlugin.init();
     rangerPlugin.setResultProcessor(new RangerDefaultAuditHandler());
 
-    RangerPluginConfig hadoopUserGroupInformationConfiguration =
-        new RangerPluginConfig("openmetadata", null, null, null, null, null);
-    hadoopUserGroupInformationConfiguration.addResourceIfReadable(config.get(HADOOP_CONFIGURATION));
-    UserGroupInformation.setConfiguration(hadoopUserGroupInformationConfiguration);
+    groupsRolesProvider = new RangerHadoopUserGroupsRolesProvider(rangerPlugin);
+
+    permissionsProvider = new RangerPermissionsProvider(rangerPlugin);
   }
 
   @Override
   public List<ResourcePermission> listPermissions(SecurityContextInterface securityContext, String openMetadataUser) {
-    throw new NotImplementedException();
+    RangerUserGroupsRoles ugr = groupsRolesProvider.getUserGroupsRoles(securityContext, openMetadataUser);
+    return permissionsProvider.getPermission(ugr);
   }
 
   @Override
   public ResourcePermission getPermission(
       SecurityContextInterface securityContext, String openMetadataUser, String openMetadataResourceName) {
-    throw new NotImplementedException();
+    RangerUserGroupsRoles ugr = groupsRolesProvider.getUserGroupsRoles(securityContext, openMetadataUser);
+    return permissionsProvider.getPermission(ugr, new RangerOpenmetadataAccessResource(openMetadataResourceName));
   }
 
   @Override
   @SneakyThrows
   public ResourcePermission getPermission(
       SecurityContextInterface securityContext, String openMetadataUser, ResourceContextInterface resourceContext) {
-    throw new NotImplementedException();
+    RangerUserGroupsRoles ugr = groupsRolesProvider.getUserGroupsRoles(securityContext, openMetadataUser);
+    return permissionsProvider.getPermission(ugr, new RangerOpenmetadataAccessResource(resourceContext));
   }
 
   @Override
@@ -84,16 +82,38 @@ public class RangerAuthorizer implements Authorizer {
       OperationContextInterface operationContext,
       ResourceContextInterface resourceContext)
       throws IOException {
-    throw new NotImplementedException();
+    RangerUserGroupsRoles ugr = groupsRolesProvider.getUserGroupsRoles(securityContext);
+
+    RangerAccessResource accessResource = new RangerOpenmetadataAccessResource(resourceContext);
+
+    for (MetadataOperation operation : operationContext.getOperations()) {
+      RangerAccessRequest req = new RangerOpenmetadataAccessRequest(accessResource, operation, ugr);
+      RangerAccessResult result = rangerPlugin.isAccessAllowed(req);
+      if (result != null && !result.getIsAllowed()) {
+        log.debug(
+            "RangerAuthorizer Authorization Rejection => Permission denied by Ranger for request {}, response {}",
+            req,
+            result);
+        throw new AuthorizationException(
+            String.format("[RangerAccessRequest=%s] Permission denied by Ranger: %s", req, result));
+      }
+    }
   }
 
   @Override
   public void authorizeAdmin(SecurityContextInterface securityContext) {
-    throw new NotImplementedException();
+    RangerUserGroupsRoles ugr = groupsRolesProvider.getUserGroupsRoles(securityContext);
+    if (!rangerPlugin.isServiceAdmin(ugr.getUser())) {
+      log.debug("RangerAuthorizer Authorization Rejection => User {} is not a Ranger service admin", ugr.getUser());
+      throw new AuthorizationException(
+          String.format(
+              "User %s is not a Ranger service admin for service %s", ugr.getUser(), rangerPlugin.getServiceName()));
+    }
   }
 
   @Override
   public boolean decryptSecret(SecurityContextInterface securityContext) {
-    throw new NotImplementedException();
+    RangerUserGroupsRoles ugr = groupsRolesProvider.getUserGroupsRoles(securityContext);
+    return rangerPlugin.isServiceAdmin(ugr.getUser());
   }
 }

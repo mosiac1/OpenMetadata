@@ -1,0 +1,9 @@
+<configuration xmlns:xi="http://www.w3.org/2001/XInclude">
+  <property>
+    <name>xasecure.policymgr.clientssl.keystore</name>
+    <value>/test_folder/etc/hadoop/conf/ranger-plugin-keystore.jks</value>
+    <description>
+      Java Keystore files
+    </description>
+  </property>
+</configuration>

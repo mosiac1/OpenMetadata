@@ -5,6 +5,7 @@ import static org.openmetadata.schema.type.MetadataOperation.CREATE;
 import static org.openmetadata.service.util.EntityUtil.createOrUpdateOperation;
 
 import java.io.IOException;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
 import javax.json.JsonPatch;
@@ -19,6 +20,7 @@ import org.openmetadata.schema.type.EntityHistory;
 import org.openmetadata.schema.type.EntityReference;
 import org.openmetadata.schema.type.Include;
 import org.openmetadata.schema.type.MetadataOperation;
+import org.openmetadata.schema.type.Paging;
 import org.openmetadata.security.Authorizer;
 import org.openmetadata.security.ResourceContextInterface;
 import org.openmetadata.service.Entity;
@@ -87,16 +89,7 @@ public abstract class EntityResource<T extends EntityInterface, K extends Entity
       throws IOException {
     Fields fields = getFields(fieldsParam);
     OperationContext listOperationContext = new OperationContext(entityType, getViewOperations(fields));
-    return listInternal(
-        uriInfo,
-        securityContext,
-        fields,
-        filter,
-        limitParam,
-        before,
-        after,
-        listOperationContext,
-        getResourceContext());
+    return listInternal(uriInfo, securityContext, fields, filter, limitParam, before, after, listOperationContext);
   }
 
   public ResultList<T> listInternal(
@@ -107,19 +100,37 @@ public abstract class EntityResource<T extends EntityInterface, K extends Entity
       int limitParam,
       String before,
       String after,
-      OperationContext operationContext,
-      ResourceContextInterface resourceContext)
+      OperationContext operationContext)
       throws IOException {
     RestUtil.validateCursors(before, after);
-    authorizer.authorize(ApplicationSecurityContext.of(securityContext), operationContext, resourceContext);
 
-    ResultList<T> resultList;
-    if (before != null) { // Reverse paging
-      resultList = dao.listBefore(uriInfo, fields, filter, limitParam, before);
-    } else { // Forward paging or first page
-      resultList = dao.listAfter(uriInfo, fields, filter, limitParam, after);
-    }
-    return addHref(uriInfo, resultList);
+    LinkedList<T> data = new LinkedList<>();
+    Paging paging = new Paging().withAfter(after).withBefore(before).withTotal(0);
+
+    boolean forwardPaging = before == null;
+
+    do {
+      ResultList<T> queryResult;
+      if (!forwardPaging) {
+        queryResult = dao.listBefore(uriInfo, fields, filter, 1, paging.getBefore());
+      } else {
+        queryResult = dao.listAfter(uriInfo, fields, filter, 1, paging.getAfter());
+      }
+      paging = queryResult.getPaging();
+      if (queryResult.getData().size() == 0) {
+        break;
+      }
+      T datum = queryResult.getData().get(0);
+      if (authorizer.checkAuthorization(
+          ApplicationSecurityContext.of(securityContext), operationContext, getResourceContextWithEntity(datum))) {
+        if (forwardPaging) data.addLast(datum);
+        else data.addFirst(datum);
+      }
+    } while (data.size() < limitParam
+        && !(forwardPaging && paging.getAfter() == null)
+        && !(!forwardPaging && paging.getBefore() == null));
+
+    return addHref(uriInfo, new ResultList<>(data, paging));
   }
 
   public T getInternal(UriInfo uriInfo, SecurityContext securityContext, UUID id, String fieldsParam, Include include)
@@ -197,7 +208,8 @@ public abstract class EntityResource<T extends EntityInterface, K extends Entity
 
   public Response create(UriInfo uriInfo, SecurityContext securityContext, T entity) throws IOException {
     OperationContext operationContext = new OperationContext(entityType, CREATE);
-    authorizer.authorize(ApplicationSecurityContext.of(securityContext), operationContext, getResourceContext());
+    authorizer.authorize(
+        ApplicationSecurityContext.of(securityContext), operationContext, getResourceContextWithEntity(entity));
     entity = addHref(uriInfo, dao.create(uriInfo, entity));
     LOG.info("Created {}:{}", Entity.getEntityTypeFromObject(entity), entity.getId());
     return Response.created(entity.getHref()).entity(entity).build();
@@ -207,7 +219,7 @@ public abstract class EntityResource<T extends EntityInterface, K extends Entity
     dao.prepareInternal(entity);
 
     // If entity does not exist, this is a create operation, else update operation
-    ResourceContext resourceContext = getResourceContextByName(entity.getFullyQualifiedName());
+    ResourceContext resourceContext = getResourceContextWithEntity(entity);
     OperationContext operationContext = new OperationContext(entityType, createOrUpdateOperation(resourceContext));
     authorizer.authorize(ApplicationSecurityContext.of(securityContext), operationContext, resourceContext);
     PutResponse<T> response = dao.createOrUpdate(uriInfo, entity);
@@ -265,6 +277,10 @@ public abstract class EntityResource<T extends EntityInterface, K extends Entity
     entity.setUpdatedBy(updatedBy);
     entity.setUpdatedAt(System.currentTimeMillis());
     return entity;
+  }
+
+  protected ResourceContext getResourceContextWithEntity(T entity) {
+    return getResourceContext(entityType, dao).entity(entity).id(entity.getId()).name(entity.getName()).build();
   }
 
   protected ResourceContext getResourceContext() {
