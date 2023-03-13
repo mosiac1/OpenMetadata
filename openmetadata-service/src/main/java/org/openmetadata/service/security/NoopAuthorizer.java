@@ -36,7 +36,10 @@ import org.openmetadata.service.util.RestUtil;
 @Slf4j
 public class NoopAuthorizer implements Authorizer {
 
-  public NoopAuthorizer(AuthorizerConfiguration openMetadataApplicationConfig) {
+  public NoopAuthorizer(AuthorizerConfiguration openMetadataApplicationConfig) {}
+
+  @Override
+  public void init() {
     SubjectCache.initialize();
     addAnonymousUser();
   }
