@@ -81,6 +81,7 @@ const Explore: React.FC<ExploreProps> = ({
   const [selectedQuickFilters, setSelectedQuickFilters] = useState<
     ExploreQuickFilterField[]
   >([] as ExploreQuickFilterField[]);
+
   const [showSummaryPanel, setShowSummaryPanel] = useState(false);
   const [entityDetails, setEntityDetails] =
     useState<{ details: EntityDetailsType; entityType: string }>();
