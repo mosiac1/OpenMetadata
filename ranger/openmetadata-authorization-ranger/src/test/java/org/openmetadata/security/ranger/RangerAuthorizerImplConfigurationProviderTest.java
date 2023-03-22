@@ -21,7 +21,7 @@ import org.junit.jupiter.api.Test;
 import org.openmetadata.schema.api.security.AuthorizerConfiguration;
 import org.openmetadata.schema.api.security.ExtraConfiguration;
 
-public class RangerAuthorizerConfigurationProviderTest {
+public class RangerAuthorizerImplConfigurationProviderTest {
 
   @Test
   public void testGetHadoopConfiguration() {

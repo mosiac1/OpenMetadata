@@ -12,30 +12,55 @@
  ~  limitations under the License.
  -->
 
-<assembly xmlns="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.0"
-          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-          xsi:schemaLocation="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.0 http://maven.apache.org/xsd/assembly-1.1.0.xsd">
+<assembly>
     <id>bin</id>
     <formats>
         <format>tar.gz</format>
+        <format>dir</format>
     </formats>
 
     <!-- Populate deps in the lib and libs folder -->
-    <dependencySets>
-        <dependencySet>
-            <useProjectArtifact>false</useProjectArtifact>
-            <outputDirectory>libs</outputDirectory>
-            <unpack>false</unpack>
-            <excludes>
-                <exclude>junit:junit</exclude>
-            </excludes>
-        </dependencySet>
-    </dependencySets>
+    <moduleSets>
+        <!-- Service module and dependencies -->
+        <moduleSet>
+            <useAllReactorProjects>true</useAllReactorProjects>
+            <includes>
+                <include>${project.groupId}:common</include>
+                <include>${project.groupId}:openmetadata-spec</include>
+                <include>${project.groupId}:openmetadata-service</include>
+                <include>${project.groupId}:openmetadata-authorization</include>
+                <include>${project.groupId}:openmetadata-ui</include>
+                <include>${project.groupId}:openmetadata-authorization-ranger-shim</include>
+            </includes>
+            <binaries>
+                <outputDirectory>libs</outputDirectory>
+                <includeDependencies>true</includeDependencies>
+                <unpack>false</unpack>
+                <directoryMode>755</directoryMode>
+                <fileMode>644</fileMode>
+            </binaries>
+        </moduleSet>
+        <!-- Ranger Authorizer Implementation -->
+        <moduleSet>
+            <useAllReactorProjects>true</useAllReactorProjects>
+            <includes>
+                <include>${project.groupId}:openmetadata-authorization-ranger</include>
+            </includes>
+            <binaries>
+                <outputDirectory>libs/ranger-openmetadata-plugin-impl</outputDirectory>
+                <includeDependencies>true</includeDependencies>
+                <unpack>false</unpack>
+                <directoryMode>755</directoryMode>
+                <fileMode>644</fileMode>
+            </binaries>
+        </moduleSet>
+    </moduleSets>
+
 
     <fileSets>
         <fileSet>
             <directory>${project.basedir}./conf</directory>
-            <outputDirectory>/conf</outputDirectory>
+            <outputDirectory>conf</outputDirectory>
             <includes>
                 <include>*</include>
             </includes>
@@ -61,7 +86,7 @@
     <files>
         <file>
             <source>${project.basedir}./README.md</source>
-            <outputDirectory>/</outputDirectory>
+            <outputDirectory/>
         </file>
     </files>
 </assembly>

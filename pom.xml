@@ -33,10 +33,14 @@
     <module>openmetadata-spec</module>
     <module>openmetadata-service</module>
     <module>openmetadata-ui</module>
-    <module>openmetadata-dist</module>
     <module>openmetadata-clients</module>
     <module>openmetadata-authorization</module>
-    <module>openmetadata-authorization-ranger</module>
+    <module>ranger/openmetadata-authorization-ranger-shim</module>
+    <module>ranger/openmetadata-authorization-ranger</module>
+    <!--
+    dist should be the last module.
+     -->
+    <module>openmetadata-dist</module>
   </modules>
   <packaging>pom</packaging>
 
@@ -663,7 +667,7 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-assembly-plugin</artifactId>
-          <version>3.4.2</version>
+          <version>2.6</version>
         </plugin>
         <plugin>
           <groupId>io.openapitools.swagger</groupId>

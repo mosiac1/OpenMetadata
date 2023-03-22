@@ -33,14 +33,14 @@ import org.openmetadata.security.ResourceContextInterface;
 import org.openmetadata.security.SecurityContextInterface;
 
 @Slf4j
-public class RangerAuthorizer implements Authorizer {
+public class RangerAuthorizerImpl implements Authorizer {
 
   private final RangerBasePlugin rangerPlugin;
   private final RangerHadoopUserGroupsRolesProvider groupsRolesProvider;
 
   private final RangerPermissionsProvider permissionsProvider;
 
-  public RangerAuthorizer(AuthorizerConfiguration authorizerConfiguration) {
+  public RangerAuthorizerImpl(AuthorizerConfiguration authorizerConfiguration) {
     RangerAuthorizerConfigurationProvider configurationProvider =
         new RangerAuthorizerConfigurationProvider(authorizerConfiguration);
 
